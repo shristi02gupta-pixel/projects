@@ -9,14 +9,14 @@ This project is currently **under active development**.
 
 ---
 
-## 🚧 Project Status
+##  Project Status
 
 > Ongoing — features are being actively built and refined
 > AI integrations (via Claude) are experimental and evolving
 
 ---
 
-## 🧠 Core Idea
+## Core Idea
 
 LIFEFRAME aims to function as a **centralized life operating system**, combining:
 
@@ -28,9 +28,9 @@ LIFEFRAME aims to function as a **centralized life operating system**, combining
 
 ---
 
-## ✨ Features (Implemented / In Progress)
+## Features (Implemented / In Progress)
 
-### 🧭 Dashboard
+### Dashboard
 
 * Real-time overview of:
 
@@ -40,19 +40,19 @@ LIFEFRAME aims to function as a **centralized life operating system**, combining
   * GPA tracking
 * Smart AI insights panel
 
-### ✅ Task Management
+### Task Management
 
 * Add / toggle tasks
 * Categorization (Study, Health, Finance, Personal)
 * Daily tracking
 
-### 🔥 Habit Tracker
+### Habit Tracker
 
 * Weekly habit visualization
 * Streak tracking system
 * Interactive completion toggles
 
-### 📅 Calendar System
+### Calendar System
 
 * Monthly and weekly views
 * Event creation with categories:
@@ -63,20 +63,20 @@ LIFEFRAME aims to function as a **centralized life operating system**, combining
   * Social
   * Tasks
 
-### 🎓 Student HQ
+### Student HQ
 
 * Subject-wise performance tracking
 * GPA visualization
 * Assignment tracking
 * Semester timeline (weeks, exams, holidays)
 
-### 🤖 AI Features (Claude-powered)
+### AI Features (Claude-powered)
 
 * Smart insights (contextual suggestions)
 * Notes & summarization (UI scaffold present)
 * Performance prediction (UI-level implementation)
 
-### 🎨 UI/UX System
+### UI/UX System
 
 * Multi-theme support:
 
@@ -93,7 +93,7 @@ LIFEFRAME aims to function as a **centralized life operating system**, combining
   * Layout density
   * Sidebar width
 
-### 🔐 Authentication (Frontend Mock)
+### Authentication (Frontend Mock)
 
 * Login / Signup UI
 * Avatar selection
@@ -101,7 +101,7 @@ LIFEFRAME aims to function as a **centralized life operating system**, combining
 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack
 
 ### Frontend
 
@@ -121,7 +121,7 @@ LIFEFRAME aims to function as a **centralized life operating system**, combining
 
 ---
 
-## 📂 Project Structure (Current)
+## Project Structure (Current)
 
 ```
 lifeframe-v2.html   # Main application (monolithic frontend)
@@ -131,7 +131,7 @@ lifeframe-v2.html   # Main application (monolithic frontend)
 
 ---
 
-## ⚙️ How to Run
+## How to Run
 
 1. Download or clone the project
 2. Open the HTML file in a browser:
@@ -144,7 +144,7 @@ No server or build tools required.
 
 ---
 
-## 🚀 Planned Improvements
+##  Planned Improvements
 
 * Backend integration (Django / Supabase)
 * Persistent data storage
@@ -156,7 +156,7 @@ No server or build tools required.
 
 ---
 
-## ⚠️ Limitations
+## Limitations
 
 * No database (data is not persistent)
 * AI features are mostly UI-level placeholders
@@ -165,7 +165,7 @@ No server or build tools required.
 
 ---
 
-## 🧩 Vision
+##  Vision
 
 The long-term goal is to evolve LIFEFRAME into:
 
@@ -173,13 +173,13 @@ The long-term goal is to evolve LIFEFRAME into:
 
 ---
 
-## 🤝 Contribution
+## Contribution
 
 Currently not open for contributions (early-stage project), but structure will be improved for collaboration later.
 
 ---
 
-## 📌 Author Notes
+## Author Notes
 
 * This is a **self-driven experimental project**
 * Focus is on **UI systems + AI-driven workflows**
