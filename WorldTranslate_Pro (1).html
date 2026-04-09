@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>WorldTranslate Pro — Linguistic Intelligence System</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg-base: #0a0b0e;
+    --bg-card: #111318;
+    --bg-card2: #161820;
+    --bg-input: #0e1014;
+    --border: rgba(255,255,255,0.07);
+    --border-hover: rgba(212,175,55,0.35);
+    --gold: #d4af37;
+    --gold-light: #f0d060;
+    --gold-dim: rgba(212,175,55,0.15);
+    --text-primary: #f0ece4;
+    --text-secondary: #8a8a99;
+    --text-muted: #555566;
+    --accent: #d4af37;
+    --green: #3ecf8e;
+    --red: #ff6b6b;
+    --blue: #5b8af0;
+    --radius: 12px;
+    --radius-lg: 18px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg-base);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── BACKGROUND MESH ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse 80% 50% at 20% 10%, rgba(212,175,55,0.04) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 40% at 80% 80%, rgba(91,138,240,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative; z-index: 10;
+    padding: 24px 40px 0;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--gold) 0%, #c49a28 100%);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-family: 'Cormorant Garamond', serif; font-weight: 600; color: #0a0b0e;
+  }
+  .logo-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px; font-weight: 500; letter-spacing: 0.02em;
+  }
+  .logo-text span { color: var(--gold); }
+  .header-right {
+    display: flex; gap: 8px; align-items: center;
+  }
+  .badge {
+    background: var(--gold-dim); border: 1px solid rgba(212,175,55,0.3);
+    color: var(--gold-light); font-size: 11px; font-weight: 500; letter-spacing: 0.08em;
+    padding: 4px 10px; border-radius: 20px; text-transform: uppercase;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative; z-index: 10;
+    text-align: center; padding: 40px 20px 28px;
+  }
+  .hero h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(32px, 5vw, 52px); font-weight: 300; line-height: 1.15;
+    letter-spacing: -0.01em; color: var(--text-primary);
+  }
+  .hero h1 em { color: var(--gold); font-style: italic; }
+  .hero p {
+    margin-top: 10px; font-size: 14px; color: var(--text-secondary);
+    letter-spacing: 0.03em; font-weight: 300;
+  }
+  .lang-count {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 14px; font-size: 12px; color: var(--text-muted);
+  }
+  .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); }
+
+  /* ── MAIN CONTAINER ── */
+  .container {
+    position: relative; z-index: 10;
+    max-width: 1200px; margin: 0 auto; padding: 0 24px 60px;
+  }
+
+  /* ── OPTIONS BAR ── */
+  .options-bar {
+    display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center;
+  }
+  .opt-btn {
+    background: var(--bg-card); border: 1px solid var(--border);
+    color: var(--text-secondary); font-family: 'DM Sans', sans-serif;
+    font-size: 12px; font-weight: 500; padding: 7px 14px; border-radius: 8px;
+    cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+    letter-spacing: 0.02em;
+  }
+  .opt-btn:hover { border-color: var(--border-hover); color: var(--gold); }
+  .opt-btn.active { background: var(--gold-dim); border-color: rgba(212,175,55,0.4); color: var(--gold-light); }
+  .opt-btn svg { width: 13px; height: 13px; }
+  .spacer { flex: 1; }
+
+  /* ── TRANSLATOR GRID ── */
+  .translator {
+    display: grid; grid-template-columns: 1fr auto 1fr; gap: 0; align-items: stretch;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    overflow: hidden; min-height: 420px;
+  }
+
+  /* ── PANEL ── */
+  .panel { display: flex; flex-direction: column; }
+  .panel-header {
+    padding: 14px 18px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px; background: var(--bg-card2);
+  }
+  .lang-selector-wrap { flex: 1; position: relative; }
+  .lang-selector {
+    width: 100%; background: transparent; border: none; outline: none;
+    color: var(--text-primary); font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 500; cursor: pointer; appearance: none;
+    padding: 2px 28px 2px 0;
+  }
+  .lang-selector option { background: #1a1c24; color: var(--text-primary); }
+  .select-arrow {
+    position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+    pointer-events: none; color: var(--text-muted);
+  }
+  .detect-btn {
+    background: var(--gold-dim); border: 1px solid rgba(212,175,55,0.25);
+    color: var(--gold); font-size: 11px; font-weight: 500; padding: 4px 10px;
+    border-radius: 6px; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+    font-family: 'DM Sans', sans-serif; letter-spacing: 0.03em;
+  }
+  .detect-btn:hover { background: rgba(212,175,55,0.25); }
+
+  .panel-body { flex: 1; position: relative; }
+  .panel-textarea {
+    width: 100%; height: 100%; min-height: 300px;
+    background: transparent; border: none; outline: none; resize: none;
+    color: var(--text-primary); font-family: 'DM Sans', sans-serif;
+    font-size: 16px; line-height: 1.75; font-weight: 300; padding: 20px;
+    caret-color: var(--gold);
+  }
+  .panel-textarea::placeholder { color: var(--text-muted); font-style: italic; }
+  .panel-textarea:disabled { cursor: default; }
+  .output-text {
+    padding: 20px; font-size: 16px; line-height: 1.75; font-weight: 300;
+    color: var(--text-primary); min-height: 300px; white-space: pre-wrap; word-break: break-word;
+  }
+  .output-text.loading { color: var(--text-muted); font-style: italic; }
+
+  /* ── DIVIDER ── */
+  .divider {
+    width: 1px; background: var(--border);
+    position: relative; display: flex; align-items: center; justify-content: center;
+  }
+  .swap-btn {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: var(--bg-base); border: 1px solid var(--border-hover);
+    color: var(--gold); cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.25s; z-index: 5; font-size: 16px;
+  }
+  .swap-btn:hover { background: var(--gold-dim); transform: rotate(180deg); }
+
+  /* ── PANEL FOOTER ── */
+  .panel-footer {
+    padding: 10px 18px; border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--bg-card2);
+  }
+  .char-count { font-size: 11px; color: var(--text-muted); font-family: 'DM Mono', monospace; }
+  .action-btns { display: flex; gap: 6px; }
+  .action-btn {
+    background: none; border: 1px solid var(--border); color: var(--text-secondary);
+    font-size: 11px; font-weight: 500; padding: 5px 10px; border-radius: 6px;
+    cursor: pointer; transition: all 0.18s; font-family: 'DM Sans', sans-serif;
+    display: flex; align-items: center; gap: 5px; letter-spacing: 0.02em;
+  }
+  .action-btn:hover { border-color: var(--border-hover); color: var(--gold); }
+  .action-btn svg { width: 12px; height: 12px; }
+
+  /* ── BREAKDOWN SECTION ── */
+  .breakdown-section {
+    margin-top: 16px;
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .breakdown-header {
+    padding: 14px 20px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px; background: var(--bg-card2);
+  }
+  .breakdown-header span { font-size: 13px; font-weight: 500; color: var(--text-secondary); }
+  .breakdown-tag {
+    font-size: 10px; background: var(--gold-dim); color: var(--gold);
+    padding: 2px 8px; border-radius: 4px; letter-spacing: 0.05em; text-transform: uppercase;
+  }
+  .breakdown-body { padding: 20px; }
+  .breakdown-row {
+    display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 16px;
+    padding: 12px 0; border-bottom: 1px solid var(--border); align-items: start;
+  }
+  .breakdown-row:last-child { border-bottom: none; }
+  .bd-original { font-size: 14px; color: var(--text-primary); font-style: italic; }
+  .bd-translated { font-size: 14px; color: var(--gold-light); font-weight: 500; }
+  .bd-note { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
+  .loading-row { display: flex; align-items: center; gap: 10px; padding: 16px 0; color: var(--text-muted); font-size: 13px; }
+
+  /* ── STATUS ── */
+  .status-bar {
+    display: flex; align-items: center; gap: 12px; margin-top: 12px;
+    padding: 0 4px;
+  }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-muted); transition: background 0.3s; }
+  .status-dot.active { background: var(--green); box-shadow: 0 0 8px rgba(62,207,142,0.4); }
+  .status-dot.loading { background: var(--gold); box-shadow: 0 0 8px rgba(212,175,55,0.4); animation: pulse 1s infinite; }
+  .status-dot.error { background: var(--red); }
+  .status-text { font-size: 12px; color: var(--text-muted); }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+
+  /* ── SPINNER ── */
+  .spinner {
+    width: 18px; height: 18px; border: 2px solid var(--border);
+    border-top-color: var(--gold); border-radius: 50%;
+    animation: spin 0.7s linear infinite; display: none;
+  }
+  .spinner.show { display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── LANGUAGE SEARCH ── */
+  .lang-search {
+    background: var(--bg-input); border: 1px solid var(--border);
+    color: var(--text-primary); font-family: 'DM Sans', sans-serif;
+    font-size: 12px; padding: 6px 10px; border-radius: 6px; outline: none;
+    width: 140px; transition: border-color 0.2s;
+  }
+  .lang-search:focus { border-color: var(--border-hover); }
+  .lang-search::placeholder { color: var(--text-muted); }
+
+  /* ── MIC BUTTON ── */
+  .mic-btn {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--bg-card); border: 1px solid var(--border);
+    color: var(--text-secondary); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; flex-shrink: 0;
+  }
+  .mic-btn:hover { border-color: var(--border-hover); color: var(--gold); }
+  .mic-btn.listening {
+    background: rgba(255,80,80,0.15); border-color: rgba(255,80,80,0.5);
+    color: #ff5050; animation: mic-pulse 1.2s ease-in-out infinite;
+  }
+  .mic-btn svg { width: 15px; height: 15px; }
+  @keyframes mic-pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(255,80,80,0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(255,80,80,0); }
+  }
+
+  /* ── VOICE BANNER ── */
+  .voice-banner {
+    display: none; align-items: center; gap: 10px;
+    padding: 10px 20px; background: rgba(255,80,80,0.06);
+    border-bottom: 1px solid rgba(255,80,80,0.15);
+  }
+  .voice-banner.show { display: flex; }
+  .voice-waves { display: flex; align-items: center; gap: 3px; }
+  .voice-waves span {
+    display: block; width: 3px; border-radius: 2px; background: #ff5050;
+    animation: wave 0.8s ease-in-out infinite;
+  }
+  .voice-waves span:nth-child(1) { height: 8px; animation-delay: 0s; }
+  .voice-waves span:nth-child(2) { height: 14px; animation-delay: 0.1s; }
+  .voice-waves span:nth-child(3) { height: 20px; animation-delay: 0.2s; }
+  .voice-waves span:nth-child(4) { height: 14px; animation-delay: 0.3s; }
+  .voice-waves span:nth-child(5) { height: 8px; animation-delay: 0.4s; }
+  @keyframes wave { 0%,100% { transform: scaleY(0.5); opacity:0.6; } 50% { transform: scaleY(1); opacity:1; } }
+  .voice-label { font-size: 12px; color: #ff7070; font-weight: 500; }
+  .voice-interim { font-size: 12px; color: var(--text-muted); flex: 1; font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .voice-stop {
+    background: none; border: 1px solid rgba(255,80,80,0.3); color: #ff7070;
+    font-size: 11px; padding: 3px 10px; border-radius: 5px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; transition: all 0.2s;
+  }
+  .voice-stop:hover { background: rgba(255,80,80,0.1); }
+
+  /* ── COPY FEEDBACK ── */
+  .copy-feedback {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+    background: var(--bg-card); border: 1px solid var(--border-hover);
+    color: var(--gold); font-size: 13px; padding: 10px 20px; border-radius: 8px;
+    opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 100;
+  }
+  .copy-feedback.show { opacity: 1; }
+
+  /* ── STATS ROW ── */
+  .stats-row {
+    display: flex; gap: 12px; margin-top: 14px; flex-wrap: wrap;
+  }
+  .stat-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 18px; flex: 1; min-width: 120px;
+  }
+  .stat-label { font-size: 11px; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 5px; }
+  .stat-value { font-size: 22px; font-weight: 500; color: var(--text-primary); font-family: 'Cormorant Garamond', serif; }
+  .stat-value span { font-size: 13px; color: var(--text-secondary); font-family: 'DM Sans', sans-serif; font-weight: 300; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 700px) {
+    header { padding: 16px 16px 0; }
+    .container { padding: 0 12px 40px; }
+    .translator { grid-template-columns: 1fr; grid-template-rows: auto auto auto; }
+    .divider { width: 100%; height: 1px; }
+    .swap-btn { transform: rotate(90deg); }
+    .swap-btn:hover { transform: rotate(270deg); }
+    .breakdown-row { grid-template-columns: 1fr; gap: 6px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">W</div>
+    <div class="logo-text">World<span>Translate</span> Pro</div>
+  </div>
+  <div class="header-right">
+    <div class="badge">AI-Powered</div>
+    <div class="badge" style="background:rgba(62,207,142,0.1);border-color:rgba(62,207,142,0.25);color:#3ecf8e;">Real-Time</div>
+    <div class="badge" style="background:rgba(255,80,80,0.1);border-color:rgba(255,80,80,0.25);color:#ff7070;">Voice Input</div>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>Translate Anything,<br/><em>Anywhere in the World</em></h1>
+  <p>AI-powered linguistic intelligence · Tone & emotion preservation · Cultural adaptation</p>
+  <div class="lang-count">
+    <div class="dot"></div>
+    <span id="lang-count-txt">Loading languages…</span>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="container">
+
+  <!-- OPTIONS -->
+  <div class="options-bar">
+    <button class="opt-btn" id="btn-breakdown" onclick="toggleBreakdown()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="2" rx="1"/><rect x="1" y="7" width="10" height="2" rx="1"/><rect x="1" y="11" width="12" height="2" rx="1"/></svg>
+      Line-by-Line Breakdown
+    </button>
+    <button class="opt-btn" id="btn-notes" onclick="toggleNotes()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8"/><circle cx="8" cy="11" r="0.8" fill="currentColor"/></svg>
+      Cultural Notes
+    </button>
+    <button class="opt-btn" id="btn-formal" onclick="toggleFormal()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12V5l5-3 5 3v7"/><rect x="6" y="8" width="4" height="4"/></svg>
+      Formal Tone
+    </button>
+    <div class="spacer"></div>
+    <div class="spinner" id="global-spinner"></div>
+    <div class="status-bar">
+      <div class="status-dot" id="status-dot"></div>
+      <div class="status-text" id="status-text">Ready</div>
+    </div>
+  </div>
+
+  <!-- TRANSLATOR CARD -->
+  <div class="translator">
+
+    <!-- SOURCE PANEL -->
+    <div class="panel" id="source-panel">
+      <div class="panel-header">
+        <div class="lang-selector-wrap">
+          <select class="lang-selector" id="source-lang" onchange="onSourceLangChange()">
+            <option value="auto">🔍 Detect Language</option>
+          </select>
+          <svg class="select-arrow" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4l4 4 4-4"/></svg>
+        </div>
+        <button class="detect-btn" onclick="detectLanguage()">Auto-Detect</button>
+      </div>
+      <div class="panel-body">
+      <div class="voice-banner" id="voice-banner">
+        <div class="voice-waves"><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="voice-label" id="voice-label-text">Listening…</div>
+        <div class="voice-interim" id="voice-interim">Speak now</div>
+        <button class="voice-stop" id="voice-stop-btn" onclick="stopVoice()">■ Stop</button>
+      </div>
+      <textarea class="panel-textarea" id="source-text" placeholder="Enter text to translate — or click the mic to speak…" oninput="onSourceInput()"></textarea>
+      </div>
+      <div class="panel-footer">
+        <div class="char-count" id="source-count">0 characters · 0 words</div>
+        <div class="action-btns">
+          <button class="action-btn" id="btn-clear" onclick="clearSource()">
+            <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l10 10M11 1L1 11"/></svg><span class="btn-label">Clear</span>
+          </button>
+          <button class="action-btn" id="btn-paste" onclick="pasteText()">
+            <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="1" width="7" height="9" rx="1"/><path d="M2 3H1v8h7v-1"/></svg><span class="btn-label">Paste</span>
+          </button>
+          <button class="mic-btn" id="mic-btn" onclick="toggleVoice()" title="Voice input">
+            <svg id="mic-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="5" y="1" width="6" height="9" rx="3"/>
+              <path d="M2 8a6 6 0 0012 0"/>
+              <line x1="8" y1="14" x2="8" y2="16"/>
+              <line x1="5" y1="16" x2="11" y2="16"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SWAP DIVIDER -->
+    <div class="divider">
+      <button class="swap-btn" onclick="swapLanguages()" title="Swap languages">⇄</button>
+    </div>
+
+    <!-- TARGET PANEL -->
+    <div class="panel" id="target-panel">
+      <div class="panel-header">
+        <div class="lang-selector-wrap">
+          <select class="lang-selector" id="target-lang" onchange="onTargetLangChange()">
+          </select>
+          <svg class="select-arrow" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4l4 4 4-4"/></svg>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="output-text" id="output-text" style="color: var(--text-muted); font-style: italic;">Translation will appear here…</div>
+      </div>
+      <div class="panel-footer">
+        <div class="char-count" id="target-count">—</div>
+        <div class="action-btns">
+          <button class="action-btn" id="btn-copy" onclick="copyTranslation()">
+            <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="1" width="7" height="9" rx="1"/><path d="M2 3H1v8h7v-1"/></svg><span class="btn-label">Copy</span>
+          </button>
+          <button class="action-btn" id="btn-speak" onclick="speakTranslation()">
+            <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 4h2l3-3v10L3 8H1V4z"/><path d="M8 2c1.5 1 2 2 2 4s-.5 3-2 4"/><path d="M9.5 4c.8.8 1 1.5 1 2s-.2 1.2-1 2"/></svg><span class="btn-label">Speak</span>
+          </button>
+          <button class="action-btn" id="btn-translate" onclick="translateNow()" style="border-color: rgba(212,175,55,0.3); color: var(--gold);">
+            <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="5" r="4"/><path d="M9 9l2 2"/></svg><span class="btn-label">Translate</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BREAKDOWN SECTION -->
+  <div class="breakdown-section" id="breakdown-section" style="display:none;">
+    <div class="breakdown-header">
+      <span>Linguistic Breakdown</span>
+      <div class="breakdown-tag">AI Analysis</div>
+    </div>
+    <div class="breakdown-body" id="breakdown-body">
+      <div style="color: var(--text-muted); font-size: 13px; font-style: italic;">Translate text to see line-by-line breakdown…</div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row" id="stats-row" style="display:none;">
+    <div class="stat-card">
+      <div class="stat-label">Words Translated</div>
+      <div class="stat-value" id="stat-words">0 <span>words</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Characters</div>
+      <div class="stat-value" id="stat-chars">0 <span>chars</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Source Language</div>
+      <div class="stat-value" id="stat-src" style="font-size:16px;">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Target Language</div>
+      <div class="stat-value" id="stat-tgt" style="font-size:16px;">—</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- COPY FEEDBACK -->
+<div class="copy-feedback" id="copy-feedback">✓ Copied to clipboard</div>
+
+<script>
+const LANGUAGES = [
+  ["Afrikaans","af"],["Albanian","sq"],["Amharic","am"],["Arabic","ar"],["Armenian","hy"],
+  ["Assamese","as"],["Aymara","ay"],["Azerbaijani","az"],["Bambara","bm"],["Basque","eu"],
+  ["Belarusian","be"],["Bengali","bn"],["Bhojpuri","bho"],["Bosnian","bs"],["Bulgarian","bg"],
+  ["Catalan","ca"],["Cebuano","ceb"],["Chichewa","ny"],["Chinese (Simplified)","zh-CN"],
+  ["Chinese (Traditional)","zh-TW"],["Corsican","co"],["Croatian","hr"],["Czech","cs"],
+  ["Danish","da"],["Dhivehi","dv"],["Dogri","doi"],["Dutch","nl"],["English","en"],
+  ["Esperanto","eo"],["Estonian","et"],["Ewe","ee"],["Filipino","fil"],["Finnish","fi"],
+  ["French","fr"],["Frisian","fy"],["Galician","gl"],["Georgian","ka"],["German","de"],
+  ["Greek","el"],["Guaraní","gn"],["Gujarati","gu"],["Haitian Creole","ht"],["Hausa","ha"],
+  ["Hawaiian","haw"],["Hebrew","he"],["Hindi","hi"],["Hmong","hmn"],["Hungarian","hu"],
+  ["Icelandic","is"],["Igbo","ig"],["Ilocano","ilo"],["Indonesian","id"],["Irish","ga"],
+  ["Italian","it"],["Japanese","ja"],["Javanese","jv"],["Kannada","kn"],["Kazakh","kk"],
+  ["Khmer","km"],["Kinyarwanda","rw"],["Konkani","gom"],["Korean","ko"],["Krio","kri"],
+  ["Kurdish (Kurmanji)","ku"],["Kurdish (Sorani)","ckb"],["Kyrgyz","ky"],["Lao","lo"],
+  ["Latin","la"],["Latvian","lv"],["Lingala","ln"],["Lithuanian","lt"],["Luganda","lg"],
+  ["Luxembourgish","lb"],["Macedonian","mk"],["Maithili","mai"],["Malagasy","mg"],["Malay","ms"],
+  ["Malayalam","ml"],["Maltese","mt"],["Māori","mi"],["Marathi","mr"],["Meitei","mni-Mtei"],
+  ["Mizo","lus"],["Mongolian","mn"],["Myanmar (Burmese)","my"],["Nepali","ne"],["Norwegian","no"],
+  ["Odia","or"],["Oromo","om"],["Pashto","ps"],["Persian","fa"],["Polish","pl"],
+  ["Portuguese","pt"],["Punjabi","pa"],["Quechua","qu"],["Romanian","ro"],["Russian","ru"],
+  ["Samoan","sm"],["Sanskrit","sa"],["Scots Gaelic","gd"],["Sepedi","nso"],["Serbian","sr"],
+  ["Sesotho","st"],["Shona","sn"],["Sindhi","sd"],["Sinhala","si"],["Slovak","sk"],
+  ["Slovenian","sl"],["Somali","so"],["Spanish","es"],["Sundanese","su"],["Swahili","sw"],
+  ["Swati","ss"],["Swedish","sv"],["Tagalog","tl"],["Tajik","tg"],["Tamil","ta"],
+  ["Tatar","tt"],["Telugu","te"],["Thai","th"],["Tigrinya","ti"],["Tsonga","ts"],
+  ["Turkish","tr"],["Turkmen","tk"],["Twi","ak"],["Ukrainian","uk"],["Urdu","ur"],
+  ["Uyghur","ug"],["Uzbek","uz"],["Vietnamese","vi"],["Welsh","cy"],["Xhosa","xh"],
+  ["Yiddish","yi"],["Yoruba","yo"],["Zulu","zu"]
+];
+
+let showBreakdown = false;
+let showNotes = false;
+let formalTone = false;
+let debounceTimer = null;
+let currentTranslation = '';
+let detectedLang = '';
+
+function populateLangs() {
+  const src = document.getElementById('source-lang');
+  const tgt = document.getElementById('target-lang');
+  LANGUAGES.forEach(([name, code]) => {
+    src.innerHTML += `<option value="${code}">${name}</option>`;
+    tgt.innerHTML += `<option value="${code}">${name}</option>`;
+  });
+  tgt.value = 'hi';
+  document.getElementById('lang-count-txt').textContent = `${LANGUAGES.length} world languages · Unlimited text · Real-time AI`;
+  setTimeout(() => { updateSourceUI(); updateTargetUI(); }, 0);
+}
+
+function setStatus(state, msg) {
+  const dot = document.getElementById('status-dot');
+  const txt = document.getElementById('status-text');
+  const sp = document.getElementById('global-spinner');
+  dot.className = 'status-dot ' + state;
+  txt.textContent = msg;
+  sp.className = 'spinner' + (state === 'loading' ? ' show' : '');
+}
+
+function onSourceInput() {
+  const val = document.getElementById('source-text').value;
+  const chars = val.length;
+  const words = val.trim() ? val.trim().split(/\s+/).length : 0;
+  document.getElementById('source-count').textContent = `${chars.toLocaleString()} characters · ${words.toLocaleString()} words`;
+  clearTimeout(debounceTimer);
+  if (val.trim().length < 2) { resetOutput(); return; }
+  debounceTimer = setTimeout(translateNow, 900);
+}
+
+function resetOutput() {
+  const tUI = getLangUI(document.getElementById('target-lang').value);
+  const out = document.getElementById('output-text');
+  out.textContent = tUI.out;
+  out.style.color = 'var(--text-muted)';
+  out.style.fontStyle = 'italic';
+  document.getElementById('target-count').textContent = '—';
+  setStatus('', tUI.ready);
+  document.getElementById('stats-row').style.display = 'none';
+}
+
+// ── UI LOCALIZATION STRINGS ──
+const UI = {
+  en:    { src:'Enter text to translate — or click the mic to speak…', out:'Translation will appear here…', listening:'Listening…', speak:'Speak now…', stop:'■ Stop', translating:'Translating…', ready:'Ready', detect:'Auto-Detect', clear:'Clear', paste:'Paste', copy:'Copy', speak_btn:'Speak', translate:'Translate', no_breakdown:'No breakdown available for this text.', cultural:'Cultural Notes', original:'Original', translated:'Translated', note:'Note' },
+  hi:    { src:'अनुवाद के लिए टेक्स्ट दर्ज करें — या माइक पर क्लिक करके बोलें…', out:'अनुवाद यहाँ दिखेगा…', listening:'सुन रहा हूँ…', speak:'अभी बोलें…', stop:'■ रोकें', translating:'अनुवाद हो रहा है…', ready:'तैयार', detect:'भाषा पहचानें', clear:'साफ़ करें', paste:'पेस्ट', copy:'कॉपी', speak_btn:'सुनें', translate:'अनुवाद', no_breakdown:'इस टेक्स्ट के लिए कोई विवरण उपलब्ध नहीं।', cultural:'सांस्कृतिक टिप्पणियाँ', original:'मूल', translated:'अनुवादित', note:'नोट' },
+  ar:    { src:'أدخل النص للترجمة — أو انقر على الميكروفون للتحدث…', out:'ستظهر الترجمة هنا…', listening:'أستمع…', speak:'تكلّم الآن…', stop:'■ إيقاف', translating:'جارٍ الترجمة…', ready:'جاهز', detect:'اكتشاف تلقائي', clear:'مسح', paste:'لصق', copy:'نسخ', speak_btn:'استمع', translate:'ترجمة', no_breakdown:'لا يوجد تفصيل لهذا النص.', cultural:'ملاحظات ثقافية', original:'الأصل', translated:'مترجَم', note:'ملاحظة' },
+  'zh-CN':{ src:'输入要翻译的文字 — 或点击麦克风说话…', out:'翻译将显示在这里…', listening:'正在听…', speak:'请说话…', stop:'■ 停止', translating:'翻译中…', ready:'就绪', detect:'自动识别', clear:'清除', paste:'粘贴', copy:'复制', speak_btn:'朗读', translate:'翻译', no_breakdown:'此文本没有可用的分析。', cultural:'文化注释', original:'原文', translated:'译文', note:'注释' },
+  'zh-TW':{ src:'輸入要翻譯的文字 — 或點擊麥克風說話…', out:'翻譯將顯示在這裡…', listening:'正在聆聽…', speak:'請說話…', stop:'■ 停止', translating:'翻譯中…', ready:'就緒', detect:'自動偵測', clear:'清除', paste:'貼上', copy:'複製', speak_btn:'朗讀', translate:'翻譯', no_breakdown:'此文本沒有可用的分析。', cultural:'文化注釋', original:'原文', translated:'譯文', note:'注釋' },
+  es:    { src:'Ingresa el texto a traducir — o haz clic en el micrófono para hablar…', out:'La traducción aparecerá aquí…', listening:'Escuchando…', speak:'Habla ahora…', stop:'■ Detener', translating:'Traduciendo…', ready:'Listo', detect:'Detectar idioma', clear:'Limpiar', paste:'Pegar', copy:'Copiar', speak_btn:'Escuchar', translate:'Traducir', no_breakdown:'No hay desglose disponible para este texto.', cultural:'Notas culturales', original:'Original', translated:'Traducido', note:'Nota' },
+  fr:    { src:'Entrez le texte à traduire — ou cliquez sur le micro pour parler…', out:'La traduction apparaîtra ici…', listening:'En écoute…', speak:'Parlez maintenant…', stop:'■ Arrêter', translating:'Traduction en cours…', ready:'Prêt', detect:'Détecter la langue', clear:'Effacer', paste:'Coller', copy:'Copier', speak_btn:'Écouter', translate:'Traduire', no_breakdown:'Aucune analyse disponible pour ce texte.', cultural:'Notes culturelles', original:'Original', translated:'Traduit', note:'Note' },
+  de:    { src:'Text zum Übersetzen eingeben — oder auf das Mikrofon klicken…', out:'Die Übersetzung erscheint hier…', listening:'Ich höre zu…', speak:'Jetzt sprechen…', stop:'■ Stopp', translating:'Wird übersetzt…', ready:'Bereit', detect:'Sprache erkennen', clear:'Löschen', paste:'Einfügen', copy:'Kopieren', speak_btn:'Anhören', translate:'Übersetzen', no_breakdown:'Keine Aufschlüsselung für diesen Text verfügbar.', cultural:'Kulturelle Hinweise', original:'Original', translated:'Übersetzt', note:'Hinweis' },
+  pt:    { src:'Digite o texto para traduzir — ou clique no microfone para falar…', out:'A tradução aparecerá aqui…', listening:'Ouvindo…', speak:'Fale agora…', stop:'■ Parar', translating:'Traduzindo…', ready:'Pronto', detect:'Detectar idioma', clear:'Limpar', paste:'Colar', copy:'Copiar', speak_btn:'Ouvir', translate:'Traduzir', no_breakdown:'Nenhuma análise disponível para este texto.', cultural:'Notas culturais', original:'Original', translated:'Traduzido', note:'Nota' },
+  ru:    { src:'Введите текст для перевода — или нажмите на микрофон, чтобы говорить…', out:'Перевод появится здесь…', listening:'Слушаю…', speak:'Говорите…', stop:'■ Стоп', translating:'Перевожу…', ready:'Готово', detect:'Определить язык', clear:'Очистить', paste:'Вставить', copy:'Копировать', speak_btn:'Слушать', translate:'Перевести', no_breakdown:'Разбивка для этого текста недоступна.', cultural:'Культурные заметки', original:'Оригинал', translated:'Перевод', note:'Заметка' },
+  ja:    { src:'翻訳するテキストを入力 — またはマイクをクリックして話す…', out:'翻訳がここに表示されます…', listening:'聞いています…', speak:'話してください…', stop:'■ 停止', translating:'翻訳中…', ready:'準備完了', detect:'言語を検出', clear:'クリア', paste:'貼り付け', copy:'コピー', speak_btn:'読み上げ', translate:'翻訳', no_breakdown:'このテキストの内訳はありません。', cultural:'文化的注記', original:'原文', translated:'翻訳', note:'注記' },
+  ko:    { src:'번역할 텍스트를 입력하거나 마이크를 클릭하여 말하세요…', out:'번역이 여기에 표시됩니다…', listening:'듣고 있습니다…', speak:'지금 말하세요…', stop:'■ 중지', translating:'번역 중…', ready:'준비됨', detect:'언어 감지', clear:'지우기', paste:'붙여넣기', copy:'복사', speak_btn:'듣기', translate:'번역', no_breakdown:'이 텍스트의 분석이 없습니다.', cultural:'문화적 참고', original:'원문', translated:'번역', note:'참고' },
+  it:    { src:'Inserisci il testo da tradurre — o clicca sul microfono per parlare…', out:'La traduzione apparirà qui…', listening:'In ascolto…', speak:'Parla ora…', stop:'■ Ferma', translating:'Traduzione in corso…', ready:'Pronto', detect:'Rileva lingua', clear:'Cancella', paste:'Incolla', copy:'Copia', speak_btn:'Ascolta', translate:'Traduci', no_breakdown:'Nessuna analisi disponibile per questo testo.', cultural:'Note culturali', original:'Originale', translated:'Tradotto', note:'Nota' },
+  tr:    { src:'Çevrilecek metni girin — veya konuşmak için mikrofona tıklayın…', out:'Çeviri burada görünecek…', listening:'Dinliyorum…', speak:'Şimdi konuşun…', stop:'■ Durdur', translating:'Çevriliyor…', ready:'Hazır', detect:'Dil algıla', clear:'Temizle', paste:'Yapıştır', copy:'Kopyala', speak_btn:'Dinle', translate:'Çevir', no_breakdown:'Bu metin için döküm mevcut değil.', cultural:'Kültürel notlar', original:'Orijinal', translated:'Çevrilmiş', note:'Not' },
+  nl:    { src:'Voer tekst in om te vertalen — of klik op de microfoon om te spreken…', out:'De vertaling verschijnt hier…', listening:'Luisteren…', speak:'Spreek nu…', stop:'■ Stop', translating:'Vertalen…', ready:'Klaar', detect:'Taal detecteren', clear:'Wissen', paste:'Plakken', copy:'Kopiëren', speak_btn:'Luister', translate:'Vertalen', no_breakdown:'Geen uitsplitsing beschikbaar voor deze tekst.', cultural:'Culturele notities', original:'Origineel', translated:'Vertaald', note:'Noot' },
+  pl:    { src:'Wpisz tekst do tłumaczenia — lub kliknij mikrofon, aby mówić…', out:'Tłumaczenie pojawi się tutaj…', listening:'Słucham…', speak:'Mów teraz…', stop:'■ Zatrzymaj', translating:'Tłumaczenie…', ready:'Gotowy', detect:'Wykryj język', clear:'Wyczyść', paste:'Wklej', copy:'Kopiuj', speak_btn:'Posłuchaj', translate:'Przetłumacz', no_breakdown:'Brak szczegółowego podziału dla tego tekstu.', cultural:'Notatki kulturowe', original:'Oryginał', translated:'Przetłumaczony', note:'Uwaga' },
+  uk:    { src:'Введіть текст для перекладу — або натисніть мікрофон, щоб говорити\u2026', out:'Переклад з\u2019явиться тут\u2026', listening:'Слухаю…', speak:'Говоріть зараз…', stop:'■ Стоп', translating:'Перекладаю…', ready:'Готово', detect:'Визначити мову', clear:'Очистити', paste:'Вставити', copy:'Копіювати', speak_btn:'Слухати', translate:'Перекласти', no_breakdown:'Розбивка недоступна.', cultural:'Культурні нотатки', original:'Оригінал', translated:'Переклад', note:'Нотатка' },
+  fa:    { src:'متن را برای ترجمه وارد کنید — یا روی میکروفون کلیک کنید تا صحبت کنید…', out:'ترجمه اینجا نمایش داده می‌شود…', listening:'در حال شنیدن…', speak:'الان صحبت کنید…', stop:'■ توقف', translating:'در حال ترجمه…', ready:'آماده', detect:'تشخیص زبان', clear:'پاک کردن', paste:'چسباندن', copy:'کپی', speak_btn:'گوش دهید', translate:'ترجمه', no_breakdown:'تجزیه‌ای برای این متن موجود نیست.', cultural:'یادداشت‌های فرهنگی', original:'اصلی', translated:'ترجمه‌شده', note:'یادداشت' },
+  ur:    { src:'ترجمے کے لیے متن درج کریں — یا مائیکروفون پر کلک کرکے بولیں…', out:'ترجمہ یہاں ظاہر ہوگا…', listening:'سن رہا ہوں…', speak:'ابھی بولیں…', stop:'■ رکیں', translating:'ترجمہ ہو رہا ہے…', ready:'تیار', detect:'زبان پہچانیں', clear:'صاف کریں', paste:'پیسٹ', copy:'کاپی', speak_btn:'سنیں', translate:'ترجمہ', no_breakdown:'اس متن کے لیے کوئی تفصیل نہیں۔', cultural:'ثقافتی نوٹس', original:'اصل', translated:'ترجمہ', note:'نوٹ' },
+  bn:    { src:'অনুবাদের জন্য টেক্সট লিখুন — বা মাইকে ক্লিক করে বলুন…', out:'অনুবাদ এখানে দেখাবে…', listening:'শুনছি…', speak:'এখন বলুন…', stop:'■ থামুন', translating:'অনুবাদ হচ্ছে…', ready:'প্রস্তুত', detect:'ভাষা শনাক্ত', clear:'মুছুন', paste:'পেস্ট', copy:'কপি', speak_btn:'শুনুন', translate:'অনুবাদ', no_breakdown:'এই টেক্সটের জন্য কোনো বিশ্লেষণ নেই।', cultural:'সাংস্কৃতিক নোট', original:'মূল', translated:'অনুবাদিত', note:'নোট' },
+  ta:    { src:'மொழிபெயர்க்க உரையை உள்ளிடுங்கள் — அல்லது மைக்கை கிளிக் செய்து பேசுங்கள்…', out:'மொழிபெயர்ப்பு இங்கே தோன்றும்…', listening:'கேட்கிறேன்…', speak:'இப்போது பேசுங்கள்…', stop:'■ நிறுத்து', translating:'மொழிபெயர்க்கிறது…', ready:'தயார்', detect:'மொழி கண்டறி', clear:'அழி', paste:'ஒட்டு', copy:'நகல்', speak_btn:'கேளுங்கள்', translate:'மொழிபெயர்', no_breakdown:'இந்த உரைக்கு விளக்கம் இல்லை.', cultural:'கலாச்சார குறிப்புகள்', original:'மூல', translated:'மொழிபெயர்க்கப்பட்டது', note:'குறிப்பு' },
+  te:    { src:'అనువాదం కోసం వచనం నమోదు చేయండి — లేదా మైక్ నొక్కి మాట్లాడండి…', out:'అనువాదం ఇక్కడ కనిపిస్తుంది…', listening:'వింటున్నాను…', speak:'ఇప్పుడు మాట్లాడండి…', stop:'■ ఆపు', translating:'అనువదిస్తున్నాను…', ready:'సిద్ధంగా ఉంది', detect:'భాష గుర్తించు', clear:'తొలగించు', paste:'అతికించు', copy:'కాపీ', speak_btn:'వినండి', translate:'అనువాదం', no_breakdown:'ఈ వచనానికి విశ్లేషణ లేదు.', cultural:'సాంస్కృతిక గమనికలు', original:'మూలం', translated:'అనువాదం', note:'గమనిక' },
+  vi:    { src:'Nhập văn bản cần dịch — hoặc nhấn mic để nói…', out:'Bản dịch sẽ hiển thị ở đây…', listening:'Đang nghe…', speak:'Hãy nói ngay…', stop:'■ Dừng', translating:'Đang dịch…', ready:'Sẵn sàng', detect:'Nhận diện ngôn ngữ', clear:'Xóa', paste:'Dán', copy:'Sao chép', speak_btn:'Nghe', translate:'Dịch', no_breakdown:'Không có phân tích cho văn bản này.', cultural:'Ghi chú văn hóa', original:'Gốc', translated:'Đã dịch', note:'Ghi chú' },
+  th:    { src:'ป้อนข้อความเพื่อแปล — หรือคลิกไมค์เพื่อพูด…', out:'คำแปลจะปรากฏที่นี่…', listening:'กำลังฟัง…', speak:'พูดได้เลย…', stop:'■ หยุด', translating:'กำลังแปล…', ready:'พร้อม', detect:'ตรวจจับภาษา', clear:'ล้าง', paste:'วาง', copy:'คัดลอก', speak_btn:'ฟัง', translate:'แปล', no_breakdown:'ไม่มีการวิเคราะห์สำหรับข้อความนี้', cultural:'หมายเหตุทางวัฒนธรรม', original:'ต้นฉบับ', translated:'แปลแล้ว', note:'หมายเหตุ' },
+  id:    { src:'Masukkan teks untuk diterjemahkan — atau klik mikrofon untuk berbicara…', out:'Terjemahan akan muncul di sini…', listening:'Mendengarkan…', speak:'Bicara sekarang…', stop:'■ Berhenti', translating:'Menerjemahkan…', ready:'Siap', detect:'Deteksi bahasa', clear:'Hapus', paste:'Tempel', copy:'Salin', speak_btn:'Dengarkan', translate:'Terjemahkan', no_breakdown:'Tidak ada uraian untuk teks ini.', cultural:'Catatan budaya', original:'Asli', translated:'Terjemahan', note:'Catatan' },
+  ms:    { src:'Masukkan teks untuk diterjemahkan — atau klik mikrofon untuk bercakap…', out:'Terjemahan akan muncul di sini…', listening:'Mendengar…', speak:'Bercakap sekarang…', stop:'■ Berhenti', translating:'Menterjemah…', ready:'Sedia', detect:'Kesan bahasa', clear:'Padam', paste:'Tampal', copy:'Salin', speak_btn:'Dengar', translate:'Terjemah', no_breakdown:'Tiada pecahan untuk teks ini.', cultural:'Nota budaya', original:'Asal', translated:'Terjemahan', note:'Nota' },
+  sw:    { src:'Ingiza maandishi kutafsiriwa — au bonyeza maikrofoni kusema…', out:'Tafsiri itaonekana hapa…', listening:'Nasikiliza…', speak:'Sema sasa…', stop:'■ Simama', translating:'Inatafsiri…', ready:'Iko tayari', detect:'Gundua lugha', clear:'Futa', paste:'Bandika', copy:'Nakili', speak_btn:'Sikiliza', translate:'Tafsiri', no_breakdown:'Hakuna uchambuzi kwa maandishi haya.', cultural:'Maelezo ya utamaduni', original:'Asili', translated:'Tafsiriwa', note:'Maelezo' },
+  yo:    { src:'Tẹ ọrọ sii lati tumọ — tabi tẹ maikirofoonu lati sọrọ…', out:'Itumọ yoo han nibi…', listening:'Mo n gbọ…', speak:'Sọrọ bayi…', stop:'■ Duro', translating:'Ẹ jẹ ki a tumọ…', ready:'Ṣetan', detect:'Ṣe awari ede', clear:'Parun', paste:'Lẹ', copy:'Daakọ', speak_btn:'Gbọ', translate:'Tumọ', no_breakdown:'Ko si itupalẹ fun ọrọ yii.', cultural:'Awọn akọsilẹ aṣa', original:'Atilẹba', translated:'Tumọ', note:'Akọsilẹ' },
+  ha:    { src:'Shigar da rubutu don fassarawa — ko danna makirofon don magana…', out:'Fassarar za ta bayyana a nan…', listening:'Ina sauraro…', speak:'Yi magana yanzu…', stop:'■ Tsaya', translating:'Ana fassarawa…', ready:'Shirye', detect:'Gano yare', clear:'Share', paste:'Liƙa', copy:'Kwafa', speak_btn:'Saurara', translate:'Fassara', no_breakdown:'Babu bayanin wannan rubutu.', cultural:'Bayanan al\'adu', original:'Na asali', translated:'Fassarar', note:'Bayani' },
+};
+
+function getLangUI(code) {
+  if (!code || code === 'auto') return UI.en;
+  const base = code.split('-')[0];
+  return UI[code] || UI[base] || UI.en;
+}
+
+function updateSourceUI() {
+  const lang = document.getElementById('source-lang').value;
+  const s = getLangUI(lang);
+  document.getElementById('source-text').placeholder = s.src;
+  document.getElementById('voice-label-text').textContent = s.listening;
+  document.getElementById('voice-interim').textContent = s.speak;
+  document.getElementById('voice-stop-btn').textContent = s.stop;
+  document.querySelector('#btn-clear .btn-label').textContent = s.clear;
+  document.querySelector('#btn-paste .btn-label').textContent = s.paste;
+  document.querySelector('.detect-btn').textContent = s.detect;
+}
+
+function updateTargetUI() {
+  const lang = document.getElementById('target-lang').value;
+  const s = getLangUI(lang);
+  const out = document.getElementById('output-text');
+  if (!currentTranslation) { out.textContent = s.out; out.style.color = 'var(--text-muted)'; out.style.fontStyle = 'italic'; }
+  document.querySelector('#btn-copy .btn-label').textContent = s.copy;
+  document.querySelector('#btn-speak .btn-label').textContent = s.speak_btn;
+  document.querySelector('#btn-translate .btn-label').textContent = s.translate;
+}
+
+function onSourceLangChange() {
+  updateSourceUI();
+  if (document.getElementById('source-text').value.trim()) translateNow();
+}
+function onTargetLangChange() {
+  updateTargetUI();
+  if (document.getElementById('source-text').value.trim()) translateNow();
+}
+
+function toggleBreakdown() {
+  showBreakdown = !showBreakdown;
+  document.getElementById('btn-breakdown').classList.toggle('active', showBreakdown);
+  document.getElementById('breakdown-section').style.display = showBreakdown ? 'block' : 'none';
+  if (showBreakdown && currentTranslation) translateNow();
+}
+function toggleNotes() { showNotes = !showNotes; document.getElementById('btn-notes').classList.toggle('active', showNotes); if (currentTranslation) translateNow(); }
+function toggleFormal() { formalTone = !formalTone; document.getElementById('btn-formal').classList.toggle('active', formalTone); if (document.getElementById('source-text').value.trim()) translateNow(); }
+
+async function translateNow() {
+  const sourceText = document.getElementById('source-text').value.trim();
+  if (!sourceText) { resetOutput(); return; }
+
+  const sourceLang = document.getElementById('source-lang').value;
+  const targetLang = document.getElementById('target-lang').value;
+  const targetName = LANGUAGES.find(l => l[1] === targetLang)?.[0] || targetLang;
+  const sourceName = sourceLang === 'auto' ? 'auto-detected language' : (LANGUAGES.find(l => l[1] === sourceLang)?.[0] || sourceLang);
+  const tUI = getLangUI(targetLang);
+
+  setStatus('loading', tUI.translating);
+  const out = document.getElementById('output-text');
+  out.style.color = 'var(--text-muted)';
+  out.style.fontStyle = 'italic';
+  out.textContent = tUI.translating;
+
+  try {
+    const sl = sourceLang === 'auto' ? 'auto' : sourceLang;
+    const tl = targetLang;
+
+    // MyMemory via allorigins CORS proxy - no key needed
+    async function translateChunk(text) {
+      const langpair = encodeURIComponent((sl === 'auto' ? 'autodetect' : sl) + '|' + tl);
+      const inner = 'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(text) + '&langpair=' + langpair;
+      const url = 'https://api.allorigins.win/get?url=' + encodeURIComponent(inner);
+      const r = await fetch(url);
+      if (!r.ok) throw new Error('Fetch failed ' + r.status);
+      const wrapper = await r.json();
+      const d = JSON.parse(wrapper.contents);
+      if (d.responseStatus !== 200) throw new Error(d.responseDetails || 'Translation failed');
+      return d.responseData.translatedText;
+    }
+
+    // Split into <=450-char sentence chunks
+    const CHUNK = 450;
+    const sentences = sourceText.match(/[^.!?\n]+[.!?\n]*/g) || [sourceText];
+    let chunks = [], cur = '';
+    for (const s of sentences) {
+      if ((cur + s).length > CHUNK && cur) { chunks.push(cur.trim()); cur = s; }
+      else cur += s;
+    }
+    if (cur.trim()) chunks.push(cur.trim());
+
+    const parts = [];
+    for (const chunk of chunks) parts.push(await translateChunk(chunk));
+    const mainTranslation = parts.join(' ');
+
+    currentTranslation = mainTranslation;
+    out.style.color = 'var(--text-primary)';
+    out.style.fontStyle = 'normal';
+    out.textContent = mainTranslation;
+
+    const tChars = mainTranslation.length;
+    const tWords = mainTranslation.trim().split(/\s+/).length;
+    document.getElementById('target-count').textContent = tChars.toLocaleString() + ' characters · ' + tWords.toLocaleString() + ' words';
+
+    if (showBreakdown) renderBreakdown(null, null);
+
+    const srcWords = sourceText.trim().split(/\s+/).length;
+    document.getElementById('stat-words').innerHTML = srcWords.toLocaleString() + ' <span>words</span>';
+    document.getElementById('stat-chars').innerHTML = sourceText.length.toLocaleString() + ' <span>chars</span>';
+    document.getElementById('stat-src').textContent = sourceName;
+    document.getElementById('stat-tgt').textContent = targetName;
+    document.getElementById('stats-row').style.display = 'flex';
+
+    setStatus('active', 'Translation complete');
+    setTimeout(() => setStatus('', 'Ready'), 3000);
+
+  } catch (err) {
+    out.style.color = 'var(--red)';
+    out.style.fontStyle = 'normal';
+    out.textContent = 'Translation error: ' + err.message;
+    setStatus('error', 'Error — ' + err.message);
+    console.error(err);
+  }
+}
+
+function renderBreakdown(data, notes) {
+  const body = document.getElementById('breakdown-body');
+  const tUI = getLangUI(document.getElementById('target-lang').value);
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    body.innerHTML = `<div style="color:var(--text-muted);font-size:13px;font-style:italic;">${tUI.no_breakdown}</div>`;
+    return;
+  }
+  let html = `<div style="display:grid;grid-template-columns:1fr 1fr 2fr;gap:12px;padding-bottom:10px;border-bottom:1px solid var(--border);margin-bottom:8px;">
+    <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">${tUI.original}</div>
+    <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">${tUI.translated}</div>
+    <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">${tUI.note}</div>
+  </div>`;
+  data.forEach(row => {
+    html += `<div class="breakdown-row">
+      <div class="bd-original">${escHtml(row.original || '')}</div>
+      <div class="bd-translated">${escHtml(row.translated || '')}</div>
+      <div class="bd-note">${escHtml(row.note || '')}</div>
+    </div>`;
+  });
+  if (notes) {
+    html += `<div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+      <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">${tUI.cultural}</div>
+      <div style="font-size:13px;color:var(--text-secondary);line-height:1.7;">${escHtml(notes)}</div>
+    </div>`;
+  }
+  body.innerHTML = html;
+}
+
+function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+async function detectLanguage() {
+  const txt = document.getElementById('source-text').value.trim();
+  if (!txt) return;
+  setStatus('loading', 'Detecting…');
+  try {
+    const inner = 'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(txt.slice(0, 200)) + '&langpair=autodetect|en';
+    const url = 'https://api.allorigins.win/get?url=' + encodeURIComponent(inner);
+    const r = await fetch(url);
+    const wrapper = await r.json();
+    const d = JSON.parse(wrapper.contents);
+    const detectedCode = d.responseData?.detectedLanguage || '';
+    if (detectedCode) {
+      const match = LANGUAGES.find(l => l[1] === detectedCode || l[1].startsWith(detectedCode));
+      const name = match ? match[0] : detectedCode;
+      detectedLang = name;
+      setStatus('active', 'Detected: ' + name);
+      if (match) document.getElementById('source-lang').value = match[1];
+    } else {
+      setStatus('active', 'Could not detect language');
+    }
+    setTimeout(() => setStatus('', 'Ready'), 3000);
+  } catch(e) { setStatus('error', 'Detection failed'); }
+}
+
+function swapLanguages() {
+  const srcSel = document.getElementById('source-lang');
+  const tgtSel = document.getElementById('target-lang');
+  const srcTxt = document.getElementById('source-text');
+  const out = document.getElementById('output-text');
+  const srcVal = srcSel.value === 'auto' ? 'en' : srcSel.value;
+  const tgtVal = tgtSel.value;
+  srcSel.value = tgtVal;
+  tgtSel.value = srcVal;
+  if (currentTranslation) {
+    srcTxt.value = currentTranslation;
+    out.textContent = 'Translation will appear here…';
+    out.style.color = 'var(--text-muted)';
+    out.style.fontStyle = 'italic';
+    onSourceInput();
+  }
+}
+
+function clearSource() {
+  document.getElementById('source-text').value = '';
+  document.getElementById('source-count').textContent = '0 characters · 0 words';
+  resetOutput();
+  currentTranslation = '';
+}
+
+async function pasteText() {
+  try {
+    const text = await navigator.clipboard.readText();
+    document.getElementById('source-text').value = text;
+    onSourceInput();
+  } catch(e) { alert('Please paste using Ctrl+V / Cmd+V'); }
+}
+
+function copyTranslation() {
+  if (!currentTranslation) return;
+  navigator.clipboard.writeText(currentTranslation).then(() => {
+    const fb = document.getElementById('copy-feedback');
+    fb.classList.add('show');
+    setTimeout(() => fb.classList.remove('show'), 2000);
+  });
+}
+
+function speakTranslation() {
+  if (!currentTranslation) return;
+  const utter = new SpeechSynthesisUtterance(currentTranslation);
+  const tgtLang = document.getElementById('target-lang').value;
+  utter.lang = tgtLang;
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(utter);
+}
+
+// ── VOICE RECOGNITION ──
+let recognition = null;
+let isListening = false;
+let voiceBuffer = '';
+
+function buildRecognition() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return null;
+  const r = new SR();
+  r.continuous = true;
+  r.interimResults = true;
+  r.maxAlternatives = 1;
+
+  r.onstart = () => {
+    isListening = true;
+    const s = getLangUI(document.getElementById('source-lang').value);
+    document.getElementById('mic-btn').classList.add('listening');
+    document.getElementById('voice-banner').classList.add('show');
+    document.getElementById('voice-label-text').textContent = s.listening;
+    document.getElementById('voice-interim').textContent = s.speak;
+    setStatus('loading', s.listening);
+  };
+
+  r.onresult = (e) => {
+    let interim = '';
+    let finalChunk = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) finalChunk += t;
+      else interim += t;
+    }
+    document.getElementById('voice-interim').textContent = interim || '…';
+    if (finalChunk) {
+      const ta = document.getElementById('source-text');
+      voiceBuffer += (voiceBuffer ? ' ' : '') + finalChunk.trim();
+      ta.value = voiceBuffer;
+      onSourceInput();
+    }
+  };
+
+  r.onerror = (e) => {
+    const msgs = { 'no-speech':'No speech detected', 'audio-capture':'Microphone unavailable', 'not-allowed':'Microphone permission denied', 'network':'Network error' };
+    setStatus('error', msgs[e.error] || 'Voice error: ' + e.error);
+    stopVoice();
+  };
+
+  r.onend = () => {
+    if (isListening) r.start();
+  };
+  return r;
+}
+
+function toggleVoice() {
+  if (isListening) { stopVoice(); return; }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert('Voice recognition is not supported in this browser.\nPlease use Chrome, Edge, or Safari.'); return; }
+  const srcLang = document.getElementById('source-lang').value;
+  voiceBuffer = document.getElementById('source-text').value;
+  recognition = buildRecognition();
+  recognition.lang = srcLang === 'auto' ? 'en-US' : srcLang;
+  recognition.start();
+}
+
+function stopVoice() {
+  isListening = false;
+  if (recognition) { recognition.onend = null; recognition.stop(); recognition = null; }
+  document.getElementById('mic-btn').classList.remove('listening');
+  document.getElementById('voice-banner').classList.remove('show');
+  setStatus('active', 'Voice input stopped');
+  setTimeout(() => setStatus('', 'Ready'), 2000);
+  if (document.getElementById('source-text').value.trim()) translateNow();
+}
+
+populateLangs();
+</script>
+</body>
+</html>
